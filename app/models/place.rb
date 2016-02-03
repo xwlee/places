@@ -5,8 +5,8 @@ class Place
     @id = hash[:_id].nil? ? hash[:id] : hash[:_id].to_s
     @formatted_address = hash[:formatted_address]
     @location = Point.new(hash[:geometry][:geolocation])
-    @address_components = hash[:address_components].map do |a|
-      AddressComponent.new(a)
+    if !hash[:address_components].nil?
+      @address_components = hash[:address_components].map { |a|AddressComponent.new(a) }
     end
   end
 
@@ -116,5 +116,30 @@ class Place
     ])
 
     result.map { |doc| doc[:_id].to_s }
+  end
+
+  def self.create_indexes
+    collection.indexes.create_one(:'geometry.geolocation' => Mongo::Index::GEO2DSPHERE)
+  end
+
+  def self.remove_indexes
+    collection.indexes.drop_one('geometry.geolocation_2dsphere')
+  end
+
+  def self.near(point, max_meters=nil)
+    query = {
+      :'geometry.geolocation' => {
+        :$near => {
+          :$geometry => point.to_hash,
+          :$maxDistance => max_meters
+        }
+      }
+    }
+    collection.find(query)
+  end
+
+  def near(max_meters=nil)
+    result = self.class.near(@location, max_meters)
+    self.class.to_places(result)
   end
 end
