@@ -3,12 +3,12 @@ class Place
 
   attr_accessor :id, :formatted_address, :location, :address_components
 
-  def initialize(hash)
+  def initialize(hash={})
     @id = hash[:_id].nil? ? hash[:id] : hash[:_id].to_s
     @formatted_address = hash[:formatted_address]
     @location = Point.new(hash[:geometry][:geolocation])
     if !hash[:address_components].nil?
-      @address_components = hash[:address_components].map { |a|AddressComponent.new(a) }
+      @address_components = hash[:address_components].map { |a| AddressComponent.new(a) }
     end
   end
 

@@ -2,9 +2,9 @@ class Photo
   attr_accessor :id, :location
   attr_writer :contents
 
-  def initialize(hash=nil)
-    if !hash.nil?
-      @id = hash[:_id].to_s if !hash[:_id].nil?
+  def initialize(hash={})
+    @id = hash[:_id].to_s if !hash[:_id].nil?
+    if !hash[:metadata].nil?
       @location = Point.new(hash[:metadata][:location]) if !hash[:metadata][:location].nil?
       @place = hash[:metadata][:place]
     end
